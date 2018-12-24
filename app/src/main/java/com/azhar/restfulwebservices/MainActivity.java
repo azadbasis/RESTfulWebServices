@@ -1,20 +1,16 @@
 package com.azhar.restfulwebservices;
 
-import android.content.Context;
-import android.os.AsyncTask;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.AsyncTaskLoader;
-import android.support.v4.content.Loader;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
+public class MainActivity extends AppCompatActivity {
 
     TextView output;
+    public static final String JSON_URL = "http://560057.youcanlearnit.net/services/json/itemsfeed.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,56 +23,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     public void runClickHandler(View view) {
 //        output.append("Button clicked\n");
-        getSupportLoaderManager().restartLoader(0, null, this).forceLoad();
 
+        Intent intent=new Intent(this,MyService.class);
+        intent.setData(Uri.parse(JSON_URL));
+        startService(intent);
+        startService(intent);
+        startService(intent);
     }
 
     public void clearClickHandler(View view) {
         output.setText("");
     }
 
-    @NonNull
-    @Override
-    public Loader<String> onCreateLoader(int i, @Nullable Bundle bundle) {
-        output.append("creating loader\n");
-        return new MyTaskLoader(this);
-    }
-
-    @Override
-    public void onLoadFinished(@NonNull Loader<String> loader, String data) {
-        output.append("loader finished,returned: " + data + "\n");
-    }
-
-    @Override
-    public void onLoaderReset(@NonNull Loader<String> loader) {
-
-    }
-
-    private static class MyTaskLoader extends AsyncTaskLoader<String> {
-
-
-        public MyTaskLoader(@NonNull Context context) {
-            super(context);
-        }
-
-        @Nullable
-        @Override
-        public String loadInBackground() {
-
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            return "from the loader";
-        }
-
-        @Override
-        public void deliverResult(@Nullable String data) {
-            data+=", delivered";
-            super.deliverResult(data);
-
-        }
-    }
 
 }
