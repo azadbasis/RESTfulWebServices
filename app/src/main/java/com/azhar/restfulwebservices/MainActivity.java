@@ -11,16 +11,20 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import com.azhar.restfulwebservices.services.MyService;
+import com.azhar.restfulwebservices.utils.NetworkHelper;
+
 public class MainActivity extends AppCompatActivity {
 
-    TextView output;
+    private TextView output;
+    private boolean networkOk;
     public static final String JSON_URL = "http://560057.youcanlearnit.net/services/json/itemsfeed.php";
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            String message=intent.getStringExtra(MyService.MY_SERVICE_PAYLOAD);
-            output.append(message+"\n");
+            String message = intent.getStringExtra(MyService.MY_SERVICE_PAYLOAD);
+            output.append(message + "\n");
         }
     };
 
@@ -31,8 +35,9 @@ public class MainActivity extends AppCompatActivity {
 
         output = (TextView) findViewById(R.id.output);
         LocalBroadcastManager.getInstance(getApplicationContext())
-                             .registerReceiver(mBroadcastReceiver, new IntentFilter(MyService.MY_SERVICE_MESSAGE));
-
+                .registerReceiver(mBroadcastReceiver, new IntentFilter(MyService.MY_SERVICE_MESSAGE));
+        networkOk = NetworkHelper.hasNetworkAccess(this);
+        output.append("Network ok: " + networkOk);
     }
 
     @Override

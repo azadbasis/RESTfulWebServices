@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.azhar.restfulwebservices">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -18,8 +21,8 @@
         </activity>
 
         <service
-            android:name=".MyService"
-            android:exported="false"></service>
+            android:name=".services.MyService"
+            android:exported="false"/>
     </application>
 
 </manifest>

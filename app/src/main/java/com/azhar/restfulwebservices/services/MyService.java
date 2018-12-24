@@ -1,4 +1,4 @@
-package com.azhar.restfulwebservices;
+package com.azhar.restfulwebservices.services;
 
 import android.app.IntentService;
 import android.content.Intent;
