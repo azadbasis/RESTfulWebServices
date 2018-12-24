@@ -1,12 +1,18 @@
 package com.azhar.restfulwebservices;
 
+import android.content.Context;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
 
     TextView output;
 
@@ -21,8 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void runClickHandler(View view) {
 //        output.append("Button clicked\n");
-        MyAsyncTask task = new MyAsyncTask();
-        task.execute("String 1", "String 2", "String 3");
+        getSupportLoaderManager().restartLoader(0, null, this).forceLoad();
 
     }
 
@@ -30,35 +35,47 @@ public class MainActivity extends AppCompatActivity {
         output.setText("");
     }
 
-    private class MyAsyncTask extends AsyncTask<String, String, Void> {
+    @NonNull
+    @Override
+    public Loader<String> onCreateLoader(int i, @Nullable Bundle bundle) {
+        output.append("creating loader\n");
+        return new MyTaskLoader(this);
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<String> loader, String data) {
+        output.append("loader finished,returned: " + data + "\n");
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<String> loader) {
+
+    }
+
+    private static class MyTaskLoader extends AsyncTaskLoader<String> {
+
+
+        public MyTaskLoader(@NonNull Context context) {
+            super(context);
+        }
+
+        @Nullable
         @Override
-        protected Void doInBackground(String... strings) {
-            for (String string: strings) {
-                publishProgress(string);
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        public String loadInBackground() {
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-
-            return null;
+            return "from the loader";
         }
 
         @Override
-        protected void onProgressUpdate(String... values) {
-            super.onProgressUpdate(values);
-            output.append(values[0] + "\n");
-        }
+        public void deliverResult(@Nullable String data) {
+            data+=", delivered";
+            super.deliverResult(data);
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
         }
     }
 
