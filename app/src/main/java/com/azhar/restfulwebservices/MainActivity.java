@@ -1,7 +1,11 @@
 package com.azhar.restfulwebservices;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -11,6 +15,14 @@ public class MainActivity extends AppCompatActivity {
 
     TextView output;
     public static final String JSON_URL = "http://560057.youcanlearnit.net/services/json/itemsfeed.php";
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String message=intent.getStringExtra(MyService.MY_SERVICE_PAYLOAD);
+            output.append(message+"\n");
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,17 +30,25 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         output = (TextView) findViewById(R.id.output);
+        LocalBroadcastManager.getInstance(getApplicationContext())
+                             .registerReceiver(mBroadcastReceiver, new IntentFilter(MyService.MY_SERVICE_MESSAGE));
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(getApplicationContext())
+                .unregisterReceiver(mBroadcastReceiver);
     }
 
     public void runClickHandler(View view) {
 //        output.append("Button clicked\n");
 
-        Intent intent=new Intent(this,MyService.class);
+        Intent intent = new Intent(this, MyService.class);
         intent.setData(Uri.parse(JSON_URL));
         startService(intent);
-        startService(intent);
-        startService(intent);
+
     }
 
     public void clearClickHandler(View view) {

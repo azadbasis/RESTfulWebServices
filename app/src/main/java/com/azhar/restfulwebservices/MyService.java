@@ -4,12 +4,15 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 import android.net.Uri;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 public class MyService extends IntentService {
 
 
     public static final String TAG = "MyService";
+    public static final String MY_SERVICE_MESSAGE="MyServiceMessage";
+    public static final String MY_SERVICE_PAYLOAD="MyServicePayload";
 
     public MyService() {
         super("MyService");
@@ -27,6 +30,12 @@ public class MyService extends IntentService {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+
+        Intent messageIntent=new Intent(MY_SERVICE_MESSAGE);
+        messageIntent.putExtra(MY_SERVICE_PAYLOAD,"Service all done!");
+        LocalBroadcastManager manager=LocalBroadcastManager.getInstance(getApplicationContext());
+        manager.sendBroadcast(messageIntent);
     }
 
     @Override
