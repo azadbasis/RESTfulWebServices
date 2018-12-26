@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.azhar.restfulwebservices.model.DataItem;
 import com.azhar.restfulwebservices.services.MyService;
 import com.azhar.restfulwebservices.utils.NetworkHelper;
 
@@ -24,8 +25,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            String message = intent.getStringExtra(MyService.MY_SERVICE_PAYLOAD);
-            output.append(message + "\n");
+          //  String message = intent.getStringExtra(MyService.MY_SERVICE_PAYLOAD);
+            DataItem[] dataItems = (DataItem[]) intent.getParcelableArrayExtra(MyService.MY_SERVICE_PAYLOAD);
+            for (DataItem items : dataItems) {
+                output.append(items.getItemName() + "\n");
+            }
         }
     };
 
@@ -50,14 +54,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void runClickHandler(View view) {
 //        output.append("Button clicked\n");
-if(networkOk){
+        if (networkOk) {
 
-    Intent intent = new Intent(this, MyService.class);
-    intent.setData(Uri.parse(JSON_URL));
-    startService(intent);
-}else{
-    Toast.makeText(this, "Network is not available!", Toast.LENGTH_SHORT).show();
-}
+            Intent intent = new Intent(this, MyService.class);
+            intent.setData(Uri.parse(JSON_URL));
+            startService(intent);
+        } else {
+            Toast.makeText(this, "Network is not available!", Toast.LENGTH_SHORT).show();
+        }
 
     }
 
