@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.azhar.restfulwebservices.services.MyService;
 import com.azhar.restfulwebservices.utils.NetworkHelper;
@@ -49,10 +50,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void runClickHandler(View view) {
 //        output.append("Button clicked\n");
+if(networkOk){
 
-        Intent intent = new Intent(this, MyService.class);
-        intent.setData(Uri.parse(JSON_URL));
-        startService(intent);
+    Intent intent = new Intent(this, MyService.class);
+    intent.setData(Uri.parse(JSON_URL));
+    startService(intent);
+}else{
+    Toast.makeText(this, "Network is not available!", Toast.LENGTH_SHORT).show();
+}
 
     }
 
