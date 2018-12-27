@@ -5,9 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,20 +16,29 @@ import com.azhar.restfulwebservices.model.DataItem;
 import com.azhar.restfulwebservices.services.MyService;
 import com.azhar.restfulwebservices.utils.NetworkHelper;
 
+
 public class MainActivity extends AppCompatActivity {
 
-    private TextView output;
+    private static final String JSON_URL =
+            "http://560057.youcanlearnit.net/secured/json/itemsfeed.php";
+    private static final String XML_URL =
+            "http://560057.youcanlearnit.net/secured/xml/itemsfeed.php";
+
     private boolean networkOk;
-//    public static final String JSON_URL = "http://560057.youcanlearnit.net/services/json/itemsfeed.php";
-    public static final String XML_URL = "http://560057.youcanlearnit.net/services/xml/itemsfeed.php";
+    TextView output;
+
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
-          //  String message = intent.getStringExtra(MyService.MY_SERVICE_PAYLOAD);
-            DataItem[] dataItems = (DataItem[]) intent.getParcelableArrayExtra(MyService.MY_SERVICE_PAYLOAD);
-            for (DataItem items : dataItems) {
-                output.append(items.getItemName() + "\n");
+            if (intent.hasExtra(MyService.MY_SERVICE_PAYLOAD)) {
+                DataItem[] dataItems = (DataItem[]) intent
+                        .getParcelableArrayExtra(MyService.MY_SERVICE_PAYLOAD);
+                for (DataItem item : dataItems) {
+                    output.append(item.getItemName() + "\n");
+                }
+            } else if (intent.hasExtra(MyService.MY_SERVICE_EXCEPTION)){
+                String message = intent.getStringExtra(MyService.MY_SERVICE_EXCEPTION);
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             }
         }
     };
@@ -40,8 +49,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         output = (TextView) findViewById(R.id.output);
+
         LocalBroadcastManager.getInstance(getApplicationContext())
-                .registerReceiver(mBroadcastReceiver, new IntentFilter(MyService.MY_SERVICE_MESSAGE));
+                .registerReceiver(mBroadcastReceiver,
+                        new IntentFilter(MyService.MY_SERVICE_MESSAGE));
 
         networkOk = NetworkHelper.hasNetworkAccess(this);
         output.append("Network ok: " + networkOk);
@@ -50,26 +61,24 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
         LocalBroadcastManager.getInstance(getApplicationContext())
                 .unregisterReceiver(mBroadcastReceiver);
     }
 
     public void runClickHandler(View view) {
-//        output.append("Button clicked\n");
-        if (networkOk) {
 
+        if (networkOk) {
             Intent intent = new Intent(this, MyService.class);
             intent.setData(Uri.parse(XML_URL));
             startService(intent);
         } else {
-            Toast.makeText(this, "Network is not available!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Network not available!", Toast.LENGTH_SHORT).show();
         }
-
     }
 
     public void clearClickHandler(View view) {
         output.setText("");
     }
-
 
 }
