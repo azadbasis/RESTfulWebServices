@@ -8,8 +8,8 @@ import android.util.Log;
 
 
 import com.azhar.restfulwebservices.model.DataItem;
-import com.azhar.restfulwebservices.parsers.MyXMLParser;
 import com.azhar.restfulwebservices.utils.HttpHelper;
+import com.google.gson.Gson;
 
 import java.io.IOException;
 
@@ -43,10 +43,9 @@ public class MyService extends IntentService {
             return;
         }
 
-//        Gson gson = new Gson();
-//        DataItem[] dataItems = gson.fromJson(response, DataItem[].class);
+        Gson gson = new Gson();
+        DataItem[] dataItems = gson.fromJson(response, DataItem[].class);
 
-        DataItem[] dataItems = MyXMLParser.parseFeed(response);
 
         Intent messageIntent = new Intent(MY_SERVICE_MESSAGE);
         messageIntent.putExtra(MY_SERVICE_PAYLOAD, dataItems);
