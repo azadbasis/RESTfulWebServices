@@ -20,7 +20,8 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView output;
     private boolean networkOk;
-    public static final String JSON_URL = "http://560057.youcanlearnit.net/services/json/itemsfeed.php";
+//    public static final String JSON_URL = "http://560057.youcanlearnit.net/services/json/itemsfeed.php";
+    public static final String XML_URL = "http://560057.youcanlearnit.net/services/xml/itemsfeed.php";
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
         output = (TextView) findViewById(R.id.output);
         LocalBroadcastManager.getInstance(getApplicationContext())
                 .registerReceiver(mBroadcastReceiver, new IntentFilter(MyService.MY_SERVICE_MESSAGE));
+
         networkOk = NetworkHelper.hasNetworkAccess(this);
         output.append("Network ok: " + networkOk);
     }
@@ -57,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         if (networkOk) {
 
             Intent intent = new Intent(this, MyService.class);
-            intent.setData(Uri.parse(JSON_URL));
+            intent.setData(Uri.parse(XML_URL));
             startService(intent);
         } else {
             Toast.makeText(this, "Network is not available!", Toast.LENGTH_SHORT).show();
