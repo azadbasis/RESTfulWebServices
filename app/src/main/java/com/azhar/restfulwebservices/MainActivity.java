@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
             RequestPackage requestPackage = new RequestPackage();
             requestPackage.setEndPoint(JSON_URL);
             requestPackage.setParam("category", "Entrees");
-            requestPackage.setMethod("POST");
+            requestPackage.setMethod("GET");
             Intent intent = new Intent(this, MyService.class);
 //            intent.setData(Uri.parse(JSON_URL));
             intent.putExtra(MyService.REQUEST_PACKAGE, requestPackage);
