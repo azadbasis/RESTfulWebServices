@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.azhar.restfulwebservices.model.DataItem;
 import com.azhar.restfulwebservices.services.MyService;
 import com.azhar.restfulwebservices.utils.NetworkHelper;
+import com.azhar.restfulwebservices.utils.RequestPackage;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-          //  String message = intent.getStringExtra(MyService.MY_SERVICE_PAYLOAD);
+            //  String message = intent.getStringExtra(MyService.MY_SERVICE_PAYLOAD);
             DataItem[] dataItems = (DataItem[]) intent.getParcelableArrayExtra(MyService.MY_SERVICE_PAYLOAD);
             for (DataItem items : dataItems) {
                 output.append(items.getItemName() + "\n");
@@ -56,9 +57,15 @@ public class MainActivity extends AppCompatActivity {
 //        output.append("Button clicked\n");
         if (networkOk) {
 
+            RequestPackage requestPackage = new RequestPackage();
+            requestPackage.setEndPoint(JSON_URL);
+            requestPackage.setParam("category", "Entrees");
+
             Intent intent = new Intent(this, MyService.class);
-            intent.setData(Uri.parse(JSON_URL));
+//            intent.setData(Uri.parse(JSON_URL));
+            intent.putExtra(MyService.REQUEST_PACKAGE, requestPackage);
             startService(intent);
+
         } else {
             Toast.makeText(this, "Network is not available!", Toast.LENGTH_SHORT).show();
         }
