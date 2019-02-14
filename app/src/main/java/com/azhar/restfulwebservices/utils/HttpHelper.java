@@ -1,12 +1,13 @@
 package com.azhar.restfulwebservices.utils;
 
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
-
 import java.io.IOException;
+import java.util.Map;
 
-
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class HttpHelper {
 
@@ -25,6 +26,17 @@ public class HttpHelper {
 
         Request.Builder requestBuilder = new Request.Builder()
                 .url(address);
+
+        if (requestPackage.getMethod().equals("POST")) {
+            MultipartBody.Builder builder = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM);
+            Map<String, String> params = requestPackage.getParams();
+            for (String key : params.keySet()) {
+                builder.addFormDataPart(key, params.get(key));
+            }
+            RequestBody requestBody = builder.build();
+            requestBuilder.method("POST", requestBody);
+        }
 
         Request request = requestBuilder.build();
         Response response = client.newCall(request).execute();
