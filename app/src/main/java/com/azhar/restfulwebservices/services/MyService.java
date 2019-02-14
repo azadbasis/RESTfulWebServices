@@ -2,6 +2,15 @@ package com.azhar.restfulwebservices.services;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
+
+
+import com.azhar.restfulwebservices.model.DataItem;
+
+import java.io.IOException;
+
+import retrofit2.Call;
 
 public class MyService extends IntentService {
 
@@ -16,14 +25,27 @@ public class MyService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
 
-//        Make a service request
+//        Make the web service request
+        MyWebService webService =
+                MyWebService.retrofit.create(MyWebService.class);
+        Call<DataItem[]> call = webService.dataItems();
+
+        DataItem[] dataItems;
+
+        try {
+            dataItems = call.execute().body();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.i(TAG, "onHandleIntent: " + e.getMessage());
+            return;
+        }
 
 //        Return the data to MainActivity
-//        Intent messageIntent = new Intent(MY_SERVICE_MESSAGE);
-//        messageIntent.putExtra(MY_SERVICE_PAYLOAD, dataItems);
-//        LocalBroadcastManager manager =
-//                LocalBroadcastManager.getInstance(getApplicationContext());
-//        manager.sendBroadcast(messageIntent);
+        Intent messageIntent = new Intent(MY_SERVICE_MESSAGE);
+        messageIntent.putExtra(MY_SERVICE_PAYLOAD, dataItems);
+        LocalBroadcastManager manager =
+                LocalBroadcastManager.getInstance(getApplicationContext());
+        manager.sendBroadcast(messageIntent);
     }
 
 }

@@ -151,6 +151,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestData() {
+        Intent intent = new Intent(this,MyService.class);
+        startService(intent);
     }
 
     private void requestData(String category) {
