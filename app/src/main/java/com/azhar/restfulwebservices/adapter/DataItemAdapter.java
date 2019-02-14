@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -16,14 +14,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import com.azhar.restfulwebservices.DetailActivity;
 import com.azhar.restfulwebservices.R;
 import com.azhar.restfulwebservices.model.DataItem;
+import com.squareup.picasso.Picasso;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +32,8 @@ public class DataItemAdapter extends RecyclerView.Adapter<DataItemAdapter.ViewHo
     private Map<String, Bitmap> mBitmaps = new HashMap<>();
     private Context mContext;
     private SharedPreferences.OnSharedPreferenceChangeListener prefsListener;
+    private static final String PHOTOS_BASE_URL =
+                "http://560057.youcanlearnit.net/services/images/";
 
     public DataItemAdapter(Context context, List<DataItem> items) {
         this.mContext = context;
@@ -44,7 +41,7 @@ public class DataItemAdapter extends RecyclerView.Adapter<DataItemAdapter.ViewHo
     }
 
     @Override
-    public DataItemAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         SharedPreferences settings =
                 PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -68,20 +65,26 @@ public class DataItemAdapter extends RecyclerView.Adapter<DataItemAdapter.ViewHo
     }
 
     @Override
-    public void onBindViewHolder(DataItemAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, int position) {
         final DataItem item = mItems.get(position);
 
         try {
             holder.tvName.setText(item.getItemName());
             //display image
-            if (mBitmaps.containsKey(item.getItemName())) {
-                Bitmap bitmap = mBitmaps.get(item.getItemName());
-                holder.imageView.setImageBitmap(bitmap);
-            } else {
-                ImageDownloadTask task = new ImageDownloadTask();
-                task.setViewHolder(holder);
-                task.execute(item);
-            }
+//            if (mBitmaps.containsKey(item.getItemName())) {
+//                Bitmap bitmap = mBitmaps.get(item.getItemName());
+//                holder.imageView.setImageBitmap(bitmap);
+//            } else {
+//                ImageDownloadTask task = new ImageDownloadTask();
+//                task.setViewHolder(holder);
+//                task.execute(item);
+//            }
+            String url = PHOTOS_BASE_URL + item.getImage();
+            Picasso.get()
+                    .load(url)
+                    .resize(50, 50)
+                    .into(holder.imageView);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -125,45 +128,45 @@ public class DataItemAdapter extends RecyclerView.Adapter<DataItemAdapter.ViewHo
         }
     }
 
-    private class ImageDownloadTask extends AsyncTask<DataItem, Void, Bitmap> {
-        private static final String PHOTOS_BASE_URL =
-                "http://560057.youcanlearnit.net/services/images/";
-        private DataItem mDataItem;
-        private ViewHolder mHolder;
-
-        public void setViewHolder(ViewHolder holder) {
-            mHolder = holder;
-        }
-
-        @Override
-        protected Bitmap doInBackground(DataItem... dataItems) {
-
-            mDataItem = dataItems[0];
-            String imageUrl = PHOTOS_BASE_URL + mDataItem.getImage();
-            InputStream in = null;
-
-            try {
-                in = (InputStream) new URL(imageUrl).getContent();
-                return BitmapFactory.decodeStream(in);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    if (in != null) {
-                        in.close();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap bitmap) {
-            super.onPostExecute(bitmap);
-            mHolder.imageView.setImageBitmap(bitmap);
-            mBitmaps.put(mDataItem.getItemName(), bitmap);
-        }
-    }
+//    private class ImageDownloadTask extends AsyncTask<DataItem, Void, Bitmap> {
+//        private static final String PHOTOS_BASE_URL =
+//                "http://560057.youcanlearnit.net/services/images/";
+//        private DataItem mDataItem;
+//        private ViewHolder mHolder;
+//
+//        public void setViewHolder(ViewHolder holder) {
+//            mHolder = holder;
+//        }
+//
+//        @Override
+//        protected Bitmap doInBackground(DataItem... dataItems) {
+//
+//            mDataItem = dataItems[0];
+//            String imageUrl = PHOTOS_BASE_URL + mDataItem.getImage();
+//            InputStream in = null;
+//
+//            try {
+//                in = (InputStream) new URL(imageUrl).getContent();
+//                return BitmapFactory.decodeStream(in);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            } finally {
+//                try {
+//                    if (in != null) {
+//                        in.close();
+//                    }
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            return null;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Bitmap bitmap) {
+//            super.onPostExecute(bitmap);
+//            mHolder.imageView.setImageBitmap(bitmap);
+//            mBitmaps.put(mDataItem.getItemName(), bitmap);
+//        }
+//    }
 }
