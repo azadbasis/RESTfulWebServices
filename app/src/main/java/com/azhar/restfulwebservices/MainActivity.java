@@ -24,10 +24,15 @@ import android.widget.Toast;
 import com.azhar.restfulwebservices.adapter.DataItemAdapter;
 import com.azhar.restfulwebservices.model.DataItem;
 import com.azhar.restfulwebservices.services.MyService;
+import com.azhar.restfulwebservices.services.MyWebService;
 import com.azhar.restfulwebservices.utils.NetworkHelper;
 
 import java.util.Arrays;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -151,11 +156,37 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestData() {
-        Intent intent = new Intent(this,MyService.class);
-        startService(intent);
+        MyWebService webService =
+                MyWebService.retrofit.create(MyWebService.class);
+        Call<DataItem[]> call = webService.dataItems();
+        sendRequest(call);
     }
 
     private void requestData(String category) {
+        MyWebService webService =
+                MyWebService.retrofit.create(MyWebService.class);
+        Call<DataItem[]> call = webService.dataItems(category);
+        sendRequest(call);
+    }
+
+    private void sendRequest(Call<DataItem[]> call) {
+        call.enqueue(new Callback<DataItem[]>() {
+            @Override
+            public void onResponse(Call<DataItem[]> call, Response<DataItem[]> response) {
+                DataItem[] dataItems = response.body();
+                Toast.makeText(MainActivity.this,
+                        "Received " + dataItems.length + " items from service",
+                        Toast.LENGTH_SHORT).show();
+
+                mItemList = Arrays.asList(dataItems);
+                displayData();
+            }
+
+            @Override
+            public void onFailure(Call<DataItem[]> call, Throwable t) {
+
+            }
+        });
     }
 
     @Override
