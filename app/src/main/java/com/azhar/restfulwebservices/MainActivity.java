@@ -1,24 +1,18 @@
 package com.azhar.restfulwebservices;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.AsyncTaskLoader;
-import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,16 +27,11 @@ import com.azhar.restfulwebservices.model.DataItem;
 import com.azhar.restfulwebservices.services.MyService;
 import com.azhar.restfulwebservices.utils.NetworkHelper;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity
-        implements LoaderManager.LoaderCallbacks<Map<String, Bitmap>> {
+public class MainActivity extends AppCompatActivity {
 
     private static final int SIGNIN_REQUEST = 1001;
     public static final String MY_GLOBAL_PREFS = "my_global_prefs";
@@ -58,7 +47,6 @@ public class MainActivity extends AppCompatActivity
     RecyclerView mRecyclerView;
     DataItemAdapter mItemAdapter;
     boolean networkOk;
-    Map<String, Bitmap> mBitmaps;
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -71,8 +59,7 @@ public class MainActivity extends AppCompatActivity
 
             mItemList = Arrays.asList(dataItems);
 
-            getSupportLoaderManager().initLoader(0, null, MainActivity.this)
-                    .forceLoad();
+            displayDataItems(null);
 
         }
     };
@@ -132,7 +119,7 @@ public class MainActivity extends AppCompatActivity
     private void displayDataItems(String category) {
 //        mItemList = mDataSource.getAllItems(category);
         if (mItemList != null) {
-            mItemAdapter = new DataItemAdapter(this, mItemList, mBitmaps);
+            mItemAdapter = new DataItemAdapter(this, mItemList);
             mRecyclerView.setAdapter(mItemAdapter);
         }
     }
@@ -203,61 +190,4 @@ public class MainActivity extends AppCompatActivity
         }
 
     }
-
-    @Override
-    public Loader<Map<String, Bitmap>> onCreateLoader(int id, Bundle args) {
-        return new ImageDownloader(this, mItemList);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Map<String, Bitmap>> loader, Map<String, Bitmap> data) {
-        mBitmaps = data;
-        displayDataItems(null);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Map<String, Bitmap>> loader) {
-
-    }
-
-    private static class ImageDownloader
-            extends AsyncTaskLoader<Map<String, Bitmap>> {
-
-        private static final String PHOTOS_BASE_URL =
-                "http://560057.youcanlearnit.net/services/images/";
-        private static List<DataItem> mItemList;
-
-        public ImageDownloader(Context context, List<DataItem> itemList) {
-            super(context);
-            mItemList = itemList;
-        }
-
-        @Override
-        public Map<String, Bitmap> loadInBackground() {
-            //download image files here
-            Map<String, Bitmap> map = new HashMap<>();
-            for (DataItem item : mItemList) {
-                String imageUrl = PHOTOS_BASE_URL + item.getImage();
-                InputStream in = null;
-
-                try {
-                    in = (InputStream) new URL(imageUrl).getContent();
-                    Bitmap bitmap = BitmapFactory.decodeStream(in);
-                    map.put(item.getItemName(), bitmap);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        in.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            return map;
-        }
-    }
-
-
 }
