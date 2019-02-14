@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
@@ -24,7 +23,6 @@ import android.widget.Toast;
 
 import com.azhar.restfulwebservices.adapter.DataItemAdapter;
 import com.azhar.restfulwebservices.model.DataItem;
-import com.azhar.restfulwebservices.sample.SampleDataProvider;
 import com.azhar.restfulwebservices.services.MyService;
 import com.azhar.restfulwebservices.utils.NetworkHelper;
 
@@ -33,14 +31,11 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity";
+
     private static final int SIGNIN_REQUEST = 1001;
     public static final String MY_GLOBAL_PREFS = "my_global_prefs";
-    private static final String TAG = "MainActivity";
-    List<DataItem> dataItemList = SampleDataProvider.dataItemList;
-    private static final String JSON_URL =
-            "http://560057.youcanlearnit.net/services/json/itemsfeed.php";
 
-    //    DataSource mDataSource;
     List<DataItem> mItemList;
     DrawerLayout mDrawerLayout;
     ListView mDrawerList;
@@ -59,8 +54,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.LENGTH_SHORT).show();
 
             mItemList = Arrays.asList(dataItems);
-            displayDataItems(null);
-
+            displayData();
         }
     };
 
@@ -82,14 +76,10 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "You chose " + category,
                         Toast.LENGTH_SHORT).show();
                 mDrawerLayout.closeDrawer(mDrawerList);
-                displayDataItems(category);
+                requestData(category);
             }
         });
 //      end of navigation drawer
-
-//        mDataSource = new DataSource(this);
-//        mDataSource.open();
-//        mDataSource.seedDatabase(dataItemList);
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         boolean grid = settings.getBoolean(getString(R.string.pref_display_grid), false);
@@ -99,12 +89,9 @@ public class MainActivity extends AppCompatActivity {
             mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
         }
 
-//        displayDataItems(null);
-
         networkOk = NetworkHelper.hasNetworkAccess(this);
         if (networkOk) {
             Intent intent = new Intent(this, MyService.class);
-            intent.setData(Uri.parse(JSON_URL));
             startService(intent);
         } else {
             Toast.makeText(this, "Network not available", Toast.LENGTH_SHORT).show();
@@ -114,26 +101,15 @@ public class MainActivity extends AppCompatActivity {
                 .registerReceiver(mBroadcastReceiver,
                         new IntentFilter(MyService.MY_SERVICE_MESSAGE));
 
+        requestData();
+
     }
 
-    private void displayDataItems(String category) {
-//        mItemList = mDataSource.getAllItems(category);
+    private void displayData() {
         if (mItemList != null) {
             mItemAdapter = new DataItemAdapter(this, mItemList);
             mRecyclerView.setAdapter(mItemAdapter);
         }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-//        mDataSource.close();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-//        mDataSource.open();
     }
 
     @Override
@@ -164,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.action_all_items:
                 // display all items
-                displayDataItems(null);
+                requestData();
                 return true;
             case R.id.action_choose_category:
                 //open the drawer
@@ -172,6 +148,12 @@ public class MainActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void requestData() {
+    }
+
+    private void requestData(String category) {
     }
 
     @Override
