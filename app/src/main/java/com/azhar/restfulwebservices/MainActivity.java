@@ -1,9 +1,14 @@
 package com.azhar.restfulwebservices;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -16,12 +21,15 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import java.util.List;
 
 import com.azhar.restfulwebservices.adapter.DataItemAdapter;
-import com.azhar.restfulwebservices.database.DataSource;
 import com.azhar.restfulwebservices.model.DataItem;
 import com.azhar.restfulwebservices.sample.SampleDataProvider;
+import com.azhar.restfulwebservices.services.MyService;
+import com.azhar.restfulwebservices.utils.NetworkHelper;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,14 +37,32 @@ public class MainActivity extends AppCompatActivity {
     public static final String MY_GLOBAL_PREFS = "my_global_prefs";
     private static final String TAG = "MainActivity";
     List<DataItem> dataItemList = SampleDataProvider.dataItemList;
+    private static final String JSON_URL =
+            "http://560057.youcanlearnit.net/services/json/itemsfeed.php";
 
-    DataSource mDataSource;
-    List<DataItem> listFromDB;
+    //    DataSource mDataSource;
+    List<DataItem> mItemList;
     DrawerLayout mDrawerLayout;
     ListView mDrawerList;
     String[] mCategories;
     RecyclerView mRecyclerView;
     DataItemAdapter mItemAdapter;
+    boolean networkOk;
+
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            DataItem[] dataItems = (DataItem[]) intent
+                    .getParcelableArrayExtra(MyService.MY_SERVICE_PAYLOAD);
+            Toast.makeText(MainActivity.this,
+                    "Received " + dataItems.length + " items from service",
+                    Toast.LENGTH_SHORT).show();
+
+            mItemList = Arrays.asList(dataItems);
+            displayDataItems(null);
+
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,9 +87,9 @@ public class MainActivity extends AppCompatActivity {
         });
 //      end of navigation drawer
 
-        mDataSource = new DataSource(this);
-        mDataSource.open();
-        mDataSource.seedDatabase(dataItemList);
+//        mDataSource = new DataSource(this);
+//        mDataSource.open();
+//        mDataSource.seedDatabase(dataItemList);
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         boolean grid = settings.getBoolean(getString(R.string.pref_display_grid), false);
@@ -73,25 +99,49 @@ public class MainActivity extends AppCompatActivity {
             mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
         }
 
-        displayDataItems(null);
+//        displayDataItems(null);
+
+        networkOk = NetworkHelper.hasNetworkAccess(this);
+        if (networkOk) {
+            Intent intent = new Intent(this, MyService.class);
+            intent.setData(Uri.parse(JSON_URL));
+            startService(intent);
+        } else {
+            Toast.makeText(this, "Network not available", Toast.LENGTH_SHORT).show();
+        }
+
+        LocalBroadcastManager.getInstance(getApplicationContext())
+                .registerReceiver(mBroadcastReceiver,
+                        new IntentFilter(MyService.MY_SERVICE_MESSAGE));
+
     }
 
     private void displayDataItems(String category) {
-        listFromDB = mDataSource.getAllItems(category);
-        mItemAdapter = new DataItemAdapter(this, listFromDB);
-        mRecyclerView.setAdapter(mItemAdapter);
+//        mItemList = mDataSource.getAllItems(category);
+        if (mItemList != null) {
+            mItemAdapter = new DataItemAdapter(this, mItemList);
+            mRecyclerView.setAdapter(mItemAdapter);
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mDataSource.close();
+//        mDataSource.close();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mDataSource.open();
+//        mDataSource.open();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        LocalBroadcastManager.getInstance(getApplicationContext())
+                .unregisterReceiver(mBroadcastReceiver);
     }
 
     @Override
